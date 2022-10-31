@@ -1,0 +1,186 @@
+// C++ program for the above approach
+#include <bits/stdc++.h>
+using namespace std;
+
+// Function to perform the find operation
+// to find the parent of a disjoint set
+int Find(vector<int>& parent, int a)
+{
+
+	return parent[a]
+		= (parent[a] == a ? a : Find(parent, parent[a]));
+}
+
+// FUnction to perform union operation
+// of disjoint set union
+void Union(vector<int>& parent,
+		vector<int>& rank,
+		vector<int>& minVal,
+		int a, int b)
+{
+
+	a = Find(parent, a);
+	b = Find(parent, b);
+
+	if (rank[a] == rank[b])
+		rank[a]++;
+
+	if (rank[a] > rank[b]) {
+		parent[b] = a;
+
+		// Update the minimum value
+		// such than it should be
+		// greater than 0
+		if (minVal[a] >= 0
+			&& minVal[b] >= 0) {
+			minVal[a] = min(minVal[a],
+							minVal[b]);
+		}
+		else if (minVal[a] >= 0
+				&& minVal[b] < 0) {
+			minVal[a] = minVal[a];
+		}
+		else if (minVal[a] < 0
+				&& minVal[b] >= 0) {
+			minVal[a] = minVal[b];
+		}
+		else {
+			minVal[a] = max(minVal[a],
+							minVal[b]);
+		}
+	}
+	else {
+		parent[a] = b;
+
+		// Update the minimum value
+		// such than it should be
+		// greater than 0
+		if (minVal[a] >= 0
+			&& minVal[b] >= 0) {
+			minVal[b] = min(minVal[a],
+							minVal[b]);
+		}
+		else if (minVal[a] >= 0
+				&& minVal[b] < 0) {
+			minVal[b] = minVal[a];
+		}
+		else if (minVal[a] < 0
+				&& minVal[b] >= 0) {
+			minVal[b] = minVal[b];
+		}
+		else {
+			minVal[b] = max(minVal[a],
+							minVal[b]);
+		}
+	}
+}
+
+// Function to minimize the cost to
+// make the graph connected as per
+// the given condition
+void findMinCost(vector<pair<int, int> >& G,
+				vector<int>& cost,
+				int N, int M)
+{
+
+	// Stores the parent elements of sets
+	vector<int> parent(N + 1);
+
+	// Stores the rank of the sets
+	vector<int> rank(N + 1, 0);
+
+	// Stores the minValue of the sets
+	vector<int> minVal(N + 1);
+
+	for (int i = 1; i < N + 1; i++) {
+
+		// Update parent[i] to i
+		parent[i] = i;
+
+		// Update minValue[i] to cost[i-1]
+		minVal[i] = cost[i - 1];
+	}
+
+	for (auto i : G) {
+
+		// Add i.first and i.second
+		// elements to the same set
+		Union(parent, rank, minVal,
+			i.first, i.second);
+	}
+
+	// Stores the parent elements of
+	// the different components
+	set<int> s;
+
+	for (int i = 1; i < N + 1; i++) {
+
+		// Insert parent of i to s
+		s.insert(Find(parent, i));
+	}
+
+	// Stores the minimum value from s
+	pair<int, int> min = { 0, INT_MAX };
+
+	// Flag to mark if any minimum
+	// value is negative
+	bool flag = false;
+
+	for (auto i : s) {
+
+		// If minVal[i] is negative
+		if (minVal[i] < 0) {
+
+			// Mark flag as true
+			flag = true;
+		}
+
+		if (min.second > minVal[i]) {
+
+			// Update the minimum value
+			min = { i, minVal[i] };
+		}
+	}
+
+	// Stores minimum cost to add the edges
+	int minCost = 0;
+
+	// If the given graph is connected
+	// or components minimum values not
+	// having any negative edge
+	if (!flag || (flag && s.size() == 1)) {
+
+		for (auto i : s) {
+
+			if (i != min.first) {
+
+				// Update the minCost
+				minCost += (minVal[i] + min.second);
+			}
+		}
+
+		// Print the value of minCost
+		cout << minCost << endl;
+	}
+	else {
+
+		// Print -1
+		cout << -1 << endl;
+	}
+}
+
+// Driver Code
+int main()
+{
+	int N = 6;
+	vector<pair<int,int>> G = {
+		{ 3, 1 }, { 2, 3 }, { 2, 1 },
+		{ 4, 5 }, { 5, 6 }, { 6, 4 }
+	};
+	vector<int> cost{ 2, 1, 5, 3, 2, 9 };
+	int M = G.size();
+
+	findMinCost(G, cost, N, M);
+
+	return 0;
+}

@@ -1,0 +1,49 @@
+// C++ program to implement
+// the above approach
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Function to construct the simple and
+// connected graph such that the distance
+// between exactly K pairs of vertices is 2
+void constGraphWithCon(int N, int K)
+{
+
+	// Stores maximum possible count
+	// of edges in a graph
+	int Max = ((N - 1) * (N - 2)) / 2;
+
+	// Base Case
+	if (K > Max) {
+		cout << -1 << endl;
+		return;
+	}
+
+	// Stores edges of a graph
+	vector<pair<int, int> > ans;
+
+	// Connect all vertices of pairs (i, j)
+	for (int i = 1; i < N; i++) {
+		for (int j = i + 1; j <= N; j++) {
+			ans.emplace_back(make_pair(i, j));
+		}
+	}
+
+	// Print first ((N - 1) + Max - K) elements
+	// of edges[]
+	for (int i = 0; i < (N - 1) + Max - K; i++) {
+		cout << ans[i].first << " "
+			<< ans[i].second << endl;
+	}
+}
+
+// Driver Code
+int main()
+{
+	int N = 5, K = 3;
+	constGraphWithCon(N, K);
+
+	return 0;
+}
